@@ -2,20 +2,21 @@
 
 ### Main features
 
-- [ ] Auth
-  - [ ] Sign in with Github
-  - [ ] Add and autogenerate username
-  - [ ] Show username
-  - [ ] Logout
+- [x] Auth
+  - [x] Sign in with Github
+  - [x] Add and autogenerate username
+  - [x] Show username
+  - [x] Logout
 - [ ] Post
-  - [ ] Create Post Schema
-  - [ ] Create posts
-  - [ ] Get posts
+  - [x] Create Post Schema
+  - [x] Create posts
+  - [x] Get posts
   - [ ] Infinite scrolling
-  - [ ] Delete posts
+  - [x] Delete posts
   - [ ] Edit post
   - [ ] Detail page
 - [ ] Profile
+  - [x] Profile Detail Page
   - [ ] Edit username
 
 ### Additional Features

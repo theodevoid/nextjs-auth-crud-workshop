@@ -11,10 +11,13 @@ import {
   FormItem,
 } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
+import { api } from "~/utils/api";
 
-type PostFormProps = CreatePostFormSchema;
+type PostFormProps = CreatePostFormSchema & {
+  recipientId: string
+};
 
-export const PostForm: React.FC<PostFormProps> = ({ body, title }) => {
+export const PostForm: React.FC<PostFormProps> = ({ body, title, recipientId }) => {
   const form = useForm<CreatePostFormSchema>({
     defaultValues: {
       body: body ?? "",
@@ -22,11 +25,24 @@ export const PostForm: React.FC<PostFormProps> = ({ body, title }) => {
     },
   });
 
-  const dummySubmit = () => {};
+  const { mutate } = api.post.create.useMutation({
+    onSuccess: () => {
+      alert("Post submitted!")
+      form.reset()
+    }
+  });
+
+  const submitPost = (values: CreatePostFormSchema) => {
+    mutate({
+      body: values.body,
+      title: values.title,
+      recipientId,
+    })
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(dummySubmit)}>
+      <form onSubmit={form.handleSubmit(submitPost)}>
         <div className="flex flex-col gap-4">
           <FormField
             control={form.control}

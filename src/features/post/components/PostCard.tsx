@@ -1,4 +1,5 @@
 import { Ellipsis } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   Card,
@@ -13,35 +14,54 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { api } from "~/utils/api";
 
-export const PostCard = () => {
+type PostCardProps = {
+  username: string;
+  title: string;
+  body: string;
+  id: string
+}
+
+export const PostCard = (props: PostCardProps) => {
+  const { data } = useSession();
+
+  const { mutate: deletePost } = api.post.deletePost.useMutation({
+    onSuccess: () => {
+      alert("Post deleted")
+    }
+  })
+
+  const onDelete = () => {
+    deletePost(props.id)
+  }
+
   return (
     <Card>
       <CardHeader>
-        <p className="text-muted-foreground">@username</p>
+        <p className="text-muted-foreground">@{props.username}</p>
         <div className="flex items-center justify-between">
-          <CardTitle>The post's title</CardTitle>
+          <CardTitle>{props.title}</CardTitle>
+
+          {
+            data?.user?.username === props.username ? 
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Ellipsis />
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" align="end">
               <DropdownMenuItem>Edit Post</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 Delete Post
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> : null
+          }
         </div>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground line-clamp-2">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis,
-          odio aliquid! Accusamus harum suscipit earum modi nam inventore
-          tenetur distinctio repudiandae tempore, quidem minima sapiente
-          dignissimos ea repellat totam consequuntur voluptatum sunt laudantium
-          illum id eligendi maxime cum a? Voluptate expedita sed, eveniet
-          facilis sit assumenda quo tempora rem repudiandae.
+          {props.body}
         </p>
       </CardContent>
       <CardFooter>

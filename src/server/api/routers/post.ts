@@ -7,36 +7,50 @@ import {
 } from "~/server/api/trpc";
 
 export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
+  create: protectedProcedure.input(
+    z.object({
+      title: z.string().min(3).max(80),
+      body: z.string().min(3).max(280),
+      recipientId: z.string().cuid(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const { db, session } = ctx;
 
-  create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return ctx.db.post.create({
-        data: {
-          name: input.name,
-          createdBy: { connect: { id: ctx.session.user.id } },
-        },
-      });
-    }),
-
-  getLatest: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: ctx.session.user.id } },
-    });
+    await db.post.create({
+      data: {
+        body: input.body,
+        title: input.title,
+        authorId: session.user.id,
+        recipientId: input.recipientId,
+      }
+    })
   }),
+  getUserPosts: publicProcedure.input(
+    z.string().cuid()
+  ).query(async ({ ctx, input }) => {
+    const { db, session } = ctx;
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
+    const posts = db.post.findMany({
+      where: {
+        recipientId: input
+      },
+      include: {
+        author: true
+      }
+    })
+
+    return posts;
   }),
+  deletePost: protectedProcedure.input(
+    z.string().cuid()
+  ).mutation(async ({ ctx, input }) => {
+    const { db, session } = ctx;
+
+    await db.post.delete({
+      where: {
+        id: input,
+        authorId: session.user.id,
+      }
+    })
+  })
 });

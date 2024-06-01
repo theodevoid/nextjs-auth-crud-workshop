@@ -15,15 +15,18 @@ datasource db {
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
+    id    String @id @default(cuid())
+    title String
+    body  String
+
+    author    User @relation(fields: [authorId], references: [id], name: "author")
+    recipient User @relation(fields: [recipientId], references: [id], name: "recipient")
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
+    authorId    String
+    recipientId String
 }
 
 // Necessary for Next auth
@@ -55,15 +58,16 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    username      String?   @unique
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id             String    @id @default(cuid())
+    username       String?   @unique
+    name           String?
+    email          String?   @unique
+    emailVerified  DateTime?
+    image          String?
+    accounts       Account[]
+    sessions       Session[]
+    AuthorPosts    Post[]    @relation(name: "author")
+    RecipientPosts Post[]    @relation(name: "recipient")
 }
 
 model VerificationToken {
